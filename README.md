@@ -69,7 +69,7 @@ This example demonstrates a typical flow: registering a user, logging a found it
     (Note: Replace `[USER_ID]` with the actual ID returned after registering the user. You will need to copy this ID from the output of the `register` command.)
 
     ```bash
-pipenv run python run.py log-item --user-id [USER_ID] --description "Blue backpack" --location "Library"
+     pipenv run python run.py log-item --user-id [USER_ID] --description "Blue backpack" --location "Library"
     ```
 
 3.  **List all items to verify the logged item:**
