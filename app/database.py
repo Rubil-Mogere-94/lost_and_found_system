@@ -8,5 +8,7 @@ engine = create_engine('sqlite:///key_tracker.db', echo=False)
 Session = scoped_session(sessionmaker(bind=engine))
 
 def init_db():
-    from app.models import User, Item
+    print("Initializing database...")
+    from app.models import User, Item, Claim
     Base.metadata.create_all(bind=engine)
+    print("Database initialized.")

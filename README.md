@@ -118,9 +118,39 @@ pipenv run python run.py list-users
 
 *   `list-items`: Lists all items currently logged in the system, including their description, location, and current status (claimed or unclaimed).
 
-## Database
+## Database Schema
 
-The application uses a SQLite database named `key_tracker.db`, which is created in the root directory of the project upon first run or database initialization.
+The application uses a SQLite database with the following schema:
+
+### `users` table
+
+| Column | Type | Constraints |
+| --- | --- | --- |
+| id | Integer | Primary Key |
+| name | String | Not Null |
+| email | String | Not Null, Unique |
+| role | String | Not Null |
+| created_at | DateTime | Default now |
+
+### `items` table
+
+| Column | Type | Constraints |
+| --- | --- | --- |
+| id | Integer | Primary Key |
+| description | String | Not Null |
+| location | String | Not Null |
+| date_found | DateTime | Default now |
+| finder_id | Integer | Foreign Key to `users.id` |
+
+### `claims` table
+
+| Column | Type | Constraints |
+| --- | --- | --- |
+| id | Integer | Primary Key |
+| item_id | Integer | Foreign Key to `items.id` |
+| claimer_id | Integer | Foreign Key to `users.id` |
+| date_claimed | DateTime | Default now |
+| status | String | Default 'pending' |
 
 ## Seed the database
 

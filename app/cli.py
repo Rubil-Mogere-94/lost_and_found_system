@@ -1,7 +1,7 @@
 # app/cli.py
 import click
 from app.database import Session
-from app.models import User, Item
+from app.models import User, Item, Claim
 from sqlalchemy.exc import IntegrityError
 from app.utils import get_user_by_id, get_item_by_id, user_exists
 from datetime import datetime
@@ -73,35 +73,24 @@ def log_item(user_id, description, location):
 @click.option('--user-id', prompt='User ID', type=int, help='ID of the user claiming the item')
 def claim(item_id, user_id):
     """Claim a found item"""
-    # Initial checks for item and user existence
-    item = get_item_by_id(item_id)
-    if not item:
-        click.echo("Error: Item not found.")
-        return
-
-    user = get_user_by_id(user_id)
-    if not user:
-        click.echo("Error: User not found.")
-        return
-
     session = Session()
     try:
-        session.expire_all() # Ensure fresh data from DB
-        # Fetch the item within the current session to ensure its latest state
-        item_to_update = session.query(Item).filter(Item.id == item_id).first()
-        if not item_to_update:
-            click.echo("Error: Item not found during update process.")
+        item = get_item_by_id(item_id, session=session)
+        if not item:
+            click.echo("Error: Item not found.")
             return
 
-        # Check status using the freshly fetched item_to_update
-        if item_to_update.status == 'claimed':
-            click.echo("Error: This item has already been claimed by another user.")
-            session.rollback()
+        user = get_user_by_id(user_id, session=session)
+        if not user:
+            click.echo("Error: User not found.")
             return
 
-        item_to_update.status = 'claimed'
-        item_to_update.claimer_id = user_id
-        item_to_update.date_claimed = datetime.utcnow()
+        if item.status == 'claimed':
+            click.echo("Error: This item has already been claimed.")
+            return
+
+        claim = Claim(item_id=item_id, claimer_id=user_id, status="approved")
+        session.add(claim)
         session.commit()
         click.echo(f"Item {item_id} successfully claimed by user {user_id}")
     except IntegrityError:
@@ -124,15 +113,15 @@ def history(user_id):
     
     session = Session()
     try:
-        claimed_items = session.query(Item).filter(Item.claimer_id == user_id).all()
+        claims = session.query(Claim).filter(Claim.claimer_id == user_id).all()
 
-        if not claimed_items:
-            click.echo("No claimed items found for this user.")
+        if not claims:
+            click.echo("No claims found for this user.")
             return
 
         click.echo(f"Claim history for {user.name}:")
-        for item in claimed_items:
-            click.echo(f"  - Item {item.id}: {item.description} (claimed on {item.date_claimed})")
+        for claim in claims:
+            click.echo(f"  - Item {claim.item.id}: {claim.item.description} (claimed on {claim.date_claimed}) - Status: {claim.status}")
     except Exception as e:
         click.echo(f"An error occurred while fetching claim history: {e}")
     finally:
@@ -143,18 +132,18 @@ def history(user_id):
 @click.option('--user-id', prompt='User ID', type=int, help='ID of the admin user')
 def delete(item_id, user_id):
     """Delete an item (admin only)"""
-    user = get_user_by_id(user_id)
-    if not user or user.role != 'admin':
-        click.echo("Error: Only admin users can delete items.")
-        return
-    
-    item = get_item_by_id(item_id)
-    if not item:
-        click.echo("Error: Item not found.")
-        return
-    
     session = Session()
     try:
+        user = get_user_by_id(user_id, session=session)
+        if not user or user.role != 'admin':
+            click.echo("Error: Only admin users can delete items.")
+            return
+        
+        item = get_item_by_id(item_id, session=session)
+        if not item:
+            click.echo("Error: Item not found.")
+            return
+        
         session.delete(item)
         session.commit()
         click.echo(f"Item {item_id} deleted successfully.")
@@ -199,12 +188,8 @@ def list_items():
 
         click.echo("All items:")
         for item in items:
-            status = f"claimed by user {item.claimer_id}" if item.status == 'claimed' else "unclaimed"
-            click.echo(f"  {item.id}: {item.description} - {status}")
+            click.echo(f"  {item.id}: {item.description} - {item.status}")
     except Exception as e:
         click.echo(f"An error occurred while listing items: {e}")
     finally:
         Session.remove()
-
-if __name__ == '__main__':
-    cli()

@@ -2,16 +2,22 @@
 from app.database import Session
 from app.models import User, Item
 
-def get_user_by_id(user_id):
+def get_user_by_id(user_id, session=None):
     """Get a user by ID"""
+    if session:
+        return session.query(User).filter(User.id == user_id).first()
+    
     session = Session()
     try:
         return session.query(User).filter(User.id == user_id).first()
     finally:
         Session.remove()
 
-def get_item_by_id(item_id):
+def get_item_by_id(item_id, session=None):
     """Get an item by ID"""
+    if session:
+        return session.query(Item).filter(Item.id == item_id).first()
+    
     session = Session()
     try:
         return session.query(Item).filter(Item.id == item_id).first()

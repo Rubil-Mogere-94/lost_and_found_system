@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 sqlalchemy = "~=1.4"
 click = "~=8.1"
+alembic = "*"
 
 [dev-packages]
 
