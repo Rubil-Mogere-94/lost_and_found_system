@@ -75,13 +75,13 @@ pipenv run python run.py log-item --user-id [USER_ID] --description "Blue backpa
 3.  **List all items to verify the logged item:**
 
     ```bash
-pipenv run python run.py list-items
+    pipenv run python run.py list-items
     ```
 
 4.  **List all users to verify the registered user:**
 
     ```bash
-pipenv run python run.py list-users
+    pipenv run python run.py list-users
     ```
 
 ## Commands
