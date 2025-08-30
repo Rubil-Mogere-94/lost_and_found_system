@@ -37,14 +37,14 @@ This project requires **Python 3.9** and uses `pipenv` for dependency management
     The application uses a SQLite database (`key_tracker.db`) which needs to be initialized. Run the main application once to create the database schema. Use `python3` as shown, or `python` if `python3` is not available on your system:
 
     ```bash
-    pipenv run python3 run.py
+    pipenv run python run.py
     ```
 
     You should see the application's help message, indicating the database has been created.
 
 ## Usage
 
-To run the application, use `pipenv run python3 run.py` followed by the desired command and its options. (Note: On some systems, `python` might be used instead of `python3`.)
+To run the application, use `pipenv run python run.py` followed by the desired command and its options. (Note: On some systems, `python` might be used instead of `python3`.)
 
 For example, to list all registered users:
 
@@ -52,13 +52,7 @@ For example, to list all registered users:
 pipenv run python run.py list-users
 ```
 
-### Example Usage
 
-To register a new user named "Alice Smith" with the email "alice@example.com" and the role "finder":
-
-```bash
-pipenv run python run.py register --name "Alice Smith" --email "alice@example.com" --role finder
-```
 
 ### End-to-End Workflow Example
 
@@ -67,13 +61,12 @@ This example demonstrates a typical flow: registering a user, logging a found it
 1.  **Register a new user (e.g., a finder):**
 
     ```bash
-    pipenv run python run.py register --name "apex moghe" --email "
-apex.moghe@gmail.com" --role finder
+    pipenv run python run.py register --name "apex moghe" --email "apex.moghe@gmail.com" --role finder
     ```
 
 2.  **Log a new found item (using the user ID from the previous step):**
 
-    (Note: Replace `[USER_ID]` with the actual ID returned after registering the user.)
+    (Note: Replace `[USER_ID]` with the actual ID returned after registering the user. You will need to copy this ID from the output of the `register` command.)
 
     ```bash
 pipenv run python run.py log-item --user-id [USER_ID] --description "Blue backpack" --location "Library"
